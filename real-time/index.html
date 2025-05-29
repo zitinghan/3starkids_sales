@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 60%;
+      margin: auto;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f2f2f2;
+    }
+
+    h1 {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Today's Latest Sales</h1>
+  <table id="salesTable"></table>
+
+  <script>
+    google.script.run.withSuccessHandler(function (data) {
+      const table = document.getElementById('salesTable');
+      data.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        row.forEach(cell => {
+          const td = document.createElement(index === 0 ? 'th' : 'td');
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        table.appendChild(tr);
+      });
+    }).getSheetData();
+  </script>
+</body>
+
+</html>

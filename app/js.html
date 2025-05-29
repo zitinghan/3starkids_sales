@@ -1,0 +1,408 @@
+<script>
+	function preventFormSubmit() {
+		var forms = document.querySelectorAll('form');
+		for (var i = 0; i < forms.length; i++) {
+			forms[i].addEventListener('submit', function (event) {
+				event.preventDefault();
+			});
+		}
+	}
+	window.addEventListener('load', preventFormSubmit);
+
+	function handleFormSubmit(data) {
+		google.script.run.processForm(details.object);
+		document.getElementById("myForm").reset();
+	}
+
+	function setSpreadSheetDetails() {
+		google.script.run.withSuccessHandler(function (result) {
+			document.getElementById('projectNo').innerHTML = result.projectNo;
+			document.getElementById('projectLocation').innerHTML = result.projectLocation;
+			document.getElementById('projectDate').innerHTML = result.projectDate;
+		}).getSpreadSheetDetails();
+	}
+
+
+
+
+	const SETTINGS = {
+		weekdayTicket: 28,
+		weekendsTicket: 34,
+		weekdayHalfHourTicket: 48,
+		weekendsHalfHourTicket: 54,
+		socks: 4,
+		bellBalloon: 8,
+		bigBalloon: 6,
+		smallBalloon: 3,
+		handBalloon: 4,
+		minaralWater: 2,
+		electricalCar: 20,
+		bubbleHouse: 20,
+		showAllLog: false, // whether to show all log. False only show latest 5 records
+		holidayDates: ['16-9-2024', '17-9-2024'] // month(no zero infront)-day-year
+	};
+
+	const app = {
+		init: () => {
+			app.addListener();
+			paymentType.init();
+			setSpreadSheetDetails();
+		},
+		addListener: () => {
+
+			document.addEventListener("keyup", function (e) {
+				switch (e.keyCode) {
+					case 13: // enter
+						details.submitForm();
+						break;
+
+					case 80: // key p
+						ticket.add();
+						break;
+
+					case 79: // key o
+						socks.add();
+						break;
+
+					case 81: // key q
+						bellBalloon.add();
+						break;
+
+					case 87: // key w
+						bigBalloon.add();
+						break;
+
+					case 69: // key e
+						handBalloon.add();
+						break;
+
+					case 82: // key r
+						smallBalloon.add();
+						break;
+
+					case 27: // key esc
+						details.reset();
+						break;
+
+					case 67: // key c
+						paymentType.set(paymentType.cash);
+						break;
+
+					case 66: // key b
+						paymentType.set(paymentType.bank);
+						break;
+
+					case 84: // key t
+						paymentType.set(paymentType.tng);
+						break;
+
+					case 65: // key a
+						minaralWater.add();
+						break;
+
+					case 83: // key s
+						electricalCar.add();
+						break;
+
+					case 72: // key h
+						bubbleHouse.add();
+						break;
+
+					case 76: // key l
+						halfHourTicket.add();
+						break;
+
+					default:
+						break;
+				}
+			});
+		}
+	}
+
+	const todayPrice = {
+		isWeekday: (selectedDate) => {
+			const todayDate = new Date(selectedDate);
+			const today = `${todayDate.getMonth() + 1}-${todayDate.getDate()}-${todayDate.getFullYear()}`;
+			const isHoliday = SETTINGS.holidayDates.find((date) => {
+				return date === today;
+			});
+
+			if (isHoliday) {
+				return false
+			}
+
+			// Sunday = 0, Monday = 1, Sat = 6
+			const day = new Date().getDay();
+			return [1, 2, 3, 4].includes(day);
+		},
+		getPrice: (todayDate) => {
+			const today = todayDate || new Date()
+			return {
+				ticket: todayPrice.isWeekday(today) ? SETTINGS.weekdayTicket : SETTINGS.weekendsTicket,
+				halfHourTicket: todayPrice.isWeekday(today) ? SETTINGS.weekdayHalfHourTicket : SETTINGS.weekendsHalfHourTicket,
+				socks: SETTINGS.socks,
+				bellBalloon: SETTINGS.bellBalloon,
+				bigBalloon: SETTINGS.bigBalloon,
+				smallBalloon: SETTINGS.smallBalloon,
+				handBalloon: SETTINGS.handBalloon,
+				minaralWater: SETTINGS.minaralWater,
+				electricalCar: SETTINGS.electricalCar,
+				bubbleHouse: SETTINGS.bubbleHouse,
+				customPrice: document.getElementById('customPriceInput')?.value,
+				workshopInput: document.getElementById('workshopInput')?.value
+			}
+		}
+	};
+	const paymentType = {
+		value: null,
+		cash: 'Cash',
+		tng: 'TNG',
+		bank: 'Bank',
+		init: () => {
+			paymentType.set(paymentType.cash);
+			if (document.getElementById('paymentTypeCash')) {
+				document.getElementById('paymentTypeCash').checked = true;
+			}
+		},
+		set: (type) => {
+			this.value = type ? type : paymentType.cash;
+			switch (type) {
+				case paymentType.bank:
+					document.getElementById('paymentTypeBank').checked = true;
+					break;
+				case paymentType.tng:
+					document.getElementById('paymentTypeTng').checked = true;
+					break;
+				default:
+					if (document.getElementById('paymentTypeCash')) {
+						document.getElementById('paymentTypeCash').checked = true;
+					};
+					break;
+			}
+		},
+		get: () => {
+			return this.value;
+		}
+	}
+
+
+
+
+
+
+	const details = {
+		object: {},
+		totalAmount: 0,
+		drawList: () => {
+			let html = '';
+			for (const key of Object.keys(details.object)) {
+				if (key === 'ticket') {
+					html += ticket.getHtml();
+				}
+				if (key === 'halfHourTicket') {
+					html += halfHourTicket.getHtml();
+				}
+				if (key === 'socks') {
+					html += socks.getHtml();
+				}
+				if (key === 'bellBalloon') {
+					html += bellBalloon.getHtml();
+				}
+				if (key === 'bigBalloon') {
+					html += bigBalloon.getHtml();
+				}
+				if (key === 'smallBalloon') {
+					html += smallBalloon.getHtml();
+				}
+				if (key === 'handBalloon') {
+					html += handBalloon.getHtml();
+				}
+				if (key === 'minaralWater') {
+					html += minaralWater.getHtml();
+				}
+				if (key === 'electricalCar') {
+					html += electricalCar.getHtml();
+				}
+				if (key === 'bubbleHouse') {
+					html += bubbleHouse.getHtml();
+				}
+				if (key === 'customPrice') {
+					html += customPrice.getHtml();
+				}
+
+				if (key === 'workshopInput') {
+					html += '<div class="row">';
+					html += `<div class="col-5" >${workshopInput.getName}</div>`;
+					html += '<div class="col">x</div>';
+					html += `<div class="col">${document.getElementById(key).value}</div>`;
+					html += '<div class="col-4 details-item-control">';
+					html += `<button type="button" class="btn btn-danger" onClick="workshopInput.deduct(${key})">-</button>`;
+					html += `<button type="button" class="btn btn-outline-secondary">${details.object[key]}</button>`;
+					if (key !== 'workshopInput') {
+						html += `<button type="button" class="btn btn-success" onClick="workshopInput.add(${key})">+</button>`;
+					}
+					html += '</div></div>';
+				}
+			}
+			document.getElementById('details-list').innerHTML = html;
+			details.calculateAmount();
+		},
+		calculateAmount: () => {
+			document.getElementById('submitFormBtn').disabled = false;
+			let totalAmount = 0;
+			totalAmount = Object.keys(details.object).reduce((sum, i) => {
+				return sum + (details.object[i] * todayPrice.getPrice()[i])
+			}, 0);
+			document.getElementById('totalAmount').innerText = parseFloat(totalAmount).toFixed(2);
+			details.totalAmount = parseFloat(totalAmount).toFixed(2);
+		},
+		reset: () => {
+			details.object = {};
+			paymentType.init();
+			details.drawList();
+			// document.getElementById('phoneNumber').value = '';
+		},
+		submitForm: () => {
+			document.getElementById('submitFormBtn').disabled = true;
+			google.script.run.withFailureHandler(function (result) {
+				alert('Data Insert Error! - Please check your network status');
+			}).withSuccessHandler(function (result) {
+				if (Object.keys(details.object).length > 0) {
+					details.object.time = details.getCurrentTime();
+					details.object.paymentType = paymentType.get();
+					details.object.total = details.totalAmount;
+					// details.object.phoneNumber = document.getElementById('phoneNumber').value;
+					if (details.object.customPrice) {
+						details.object.desc = `custom price: ${document.getElementById('customPriceInput').value} x ${details.object.customPrice}`;
+					}
+					if (details.object.workshopInput) {
+						details.object.workshopAmount = document.getElementById('workshopInput').value;
+					}
+					handleFormSubmit(details.object);
+					logging.add(details.object);
+					details.reset();
+				}
+			}).isOnline();
+		},
+		getCurrentTime: () => {
+			const now = new Date();
+			return `${(now.getMonth() + 1)}/${now.getDate()}/${now.getFullYear()} ` +
+				`${details.formatTime(now.getHours())}:${details.formatTime(now.getMinutes())}:${details.formatTime(now.getSeconds())}`
+		},
+		formatTime: (value) => {
+			return value > 9 ? value : `0${value}`;
+		}
+	}
+
+
+	const logging = {
+		data: [],
+		add: (object) => {
+			logging.data = [object, ...logging.data];
+			if (!SETTINGS.showAllLog) { // show only 5 latest data
+				logging.data.splice(5);
+			}
+			logging.list();
+		},
+		clear: () => {
+			logging.data = [];
+			logging.list();
+		},
+		list: () => {
+			var html = '<ul>';
+			logging.data.forEach((log) => {
+				html += '<li>' + JSON.stringify(log) + '</li>';
+			});
+			html += '</ul>';
+			document.getElementById("log-wrapper").innerHTML = html;
+		}
+	}
+
+	const summary = {
+		data: {},
+		showSummary: () => {
+			document.getElementById('closeDailySalesBtn').disabled = true;
+			google.script.run.withSuccessHandler(function (result) {
+				// summary.data = result;
+				// logging.add(summary.data);
+				// console.log(result);
+				summary.closeDailyBtn();
+			}).updateSummary(todayPrice.getPrice().ticket, todayPrice.getPrice().halfHourTicket);
+		},
+		closeDailyBtn: () => {
+			const btn = document.getElementById('closeDailySalesBtn');
+			btn.classList.remove("btn-danger");
+			btn.classList.add("btn-secondary");
+			btn.innerText = 'Sales Closed!';
+		},
+		addCustomSummary: () => {
+			const date = document.getElementById('addCustomSummary').value;
+			google.script.run.withSuccessHandler(function (result) {
+				alert(date + ' Report Generated!')
+			}).updateSummary(todayPrice.getPrice(date).ticket, todayPrice.getPrice().halfHourTicket, date);
+		}
+	}
+
+	const priceLabel = {
+		allLabel: [],
+		setLabel: () => {
+			priceLabel.allLabel.forEach(key => {
+				if (document.getElementById(key + 'PriceSpan')) {
+					document.getElementById(key + 'PriceSpan').innerHTML = '$' + todayPrice.getPrice()[key];
+				}
+			});
+		}
+	}
+
+	function updateProgramDetails(key, name) {
+		priceLabel.allLabel.push(key);
+		return {
+			add: () => {
+				details.object[key] = details.object[key] ? details.object[key] + 1 : 1;
+				details.drawList();
+			},
+			deduct: () => {
+				details.object[key] = details.object[key] - 1;
+				if (details.object[key] === 0) {
+					delete details.object[key];
+				}
+				details.drawList();
+			},
+			getName: name,
+			getHtml: () => {
+				let html = '';
+				html += '<div class="row">';
+				html += `<div class="col-5" >${name}</div>`;
+				html += '<div class="col">x</div>';
+				html += `<div class="col">${todayPrice.getPrice()[key]}</div>`;
+				html += '<div class="col-4 details-item-control">';
+				html += `<button type="button" class="btn btn-danger" onClick="${key}.deduct()">-</button>`;
+				html += `<button type="button" class="btn btn-outline-secondary">${details.object[key]}</button>`;
+				html += `<button type="button" class="btn btn-success" onClick="${key}.add()">+</button>`;
+				html += '</div></div>';
+				return html;
+			}
+		};
+	}
+
+	const ticket = updateProgramDetails('ticket', 'Ticket');
+	const halfHourTicket = updateProgramDetails('halfHourTicket', 'Combo Ticket');
+	const socks = updateProgramDetails('socks', 'Socks 4');
+	const bellBalloon = updateProgramDetails('bellBalloon', 'Bell Balloon');
+	const bigBalloon = updateProgramDetails('bigBalloon', 'Socks 6');
+	const smallBalloon = updateProgramDetails('smallBalloon', 'Small Balloon');
+	const handBalloon = updateProgramDetails('handBalloon', 'Hand Balloon');
+	const minaralWater = updateProgramDetails('minaralWater', 'Minaral Water');
+	const electricalCar = updateProgramDetails('electricalCar', 'Electrical Car');
+	const customPrice = updateProgramDetails('customPrice', 'Custom Price');
+	const workshopInput = updateProgramDetails('workshopInput', 'DIY Workshop');
+	const bubbleHouse = updateProgramDetails('bubbleHouse', 'Bubble House');
+
+	document.addEventListener('DOMContentLoaded', function () {
+		app.init();
+		priceLabel.setLabel();
+	});
+
+
+
+</script>
