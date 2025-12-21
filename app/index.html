@@ -2,158 +2,144 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-		integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-	<?!= include('css') ?>
-	<?!= include('js'); ?>
-	<title>3 Star Kids Sales</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <?!= include('css') ?>
+    <?!= include('js'); ?>
+  <title>3 Star Kids Sales</title>
 </head>
 
 <body>
 
-	<div class="container main-wrapper">
-		<div class="row">
-			<div class="col-6 row">
-				<form id="myForm">
-					<div class="mb-4 text-center">
-						<div class="h4">3 Star Kids Sales v2</div>
-						<div class="row">
-							<small class="col-3">Project No: <span id="projectNo"></span></small>
-							<small class="col-3">Location: <span id="projectLocation"></small>
-							<small class="col">Date: <span id="projectDate"></small>
-						</div>
-					</div>
+<div class="container main-wrapper">
+  <div class="row">
+    <div class="col-6 row">
+      <form id="myForm">
+       <div class="mb-4 text-center">
+          <div class="h4">3 Star Kids Sales v2</div>
+          <div class="row">
+            <small class="col-3">Project No: <span id="projectNo"></span></small>
+            <small class="col-3">Location: <span id="projectLocation"></small>
+            <small class="col">Date: <span id="projectDate"></small>
+          </div>
+        </div>
 
-					<div>
-						<div class="mb-4">Ticket:</div>
-						<div class="col mb-4 d-flex group-products">
-							<div class="btn btn-primary btn-lg lg-btn" onclick="ticket.add()">Day <span id="ticketPriceSpan"></span>
-								(P)</div>
-							<div class="btn btn-primary btn-lg lg-btn" onclick="halfHourTicket.add()">Combo <span
-									id="halfHourTicketPriceSpan"></span> (L)</div>
-						</div>
-						<!-- <div class="row mb-4">
+        <div>
+          <div class="mb-4">Ticket:</div>
+          <div class="col mb-4 d-flex group-products">
+            <div class="btn btn-primary btn-lg lg-btn" onclick="ticket.add()">Day <span id="ticketPriceSpan"></span> (P)</div>
+            <div class="btn btn-primary btn-lg lg-btn" onclick="halfHourTicket.add()">Combo <span id="halfHourTicketPriceSpan"></span> (L)</div>
+          </div>
+          <!-- <div class="row mb-4">
             <div class="btn btn-primary btn-lg lg-btn" onclick="ticket.add()">
               Day <span id="ticketPriceSpan"></span> (P)
             </div>
           </div> -->
-						<div class="row mb-4">
+          <div class="row mb-4">
+            
+            <div class="col mb-4 d-flex group-products">
+              <div class="btn btn-secondary btn-lg sm-btn" onclick="socks.add()">
+                1 Pair Socks <span id="socksPriceSpan"></span> (O)
+              </div>
+              <div class="btn btn-secondary btn-lg sm-btn" onclick="electricalCar.add()">
+                Kiddy Car <span id="electricalCarPriceSpan"></span> (S)
+              </div>
+              <div class="btn btn-secondary btn-lg sm-btn" onclick="bubbleHouse.add()">
+                Bubble House <span id="bubbleHousePriceSpan"></span> (H)
+              </div>
+            </div>
 
-							<div class="col mb-4 d-flex group-products">
-								<div class="btn btn-secondary btn-lg sm-btn" onclick="socks.add()">
-									1 Pair Socks <span id="socksPriceSpan"></span> (O)
-								</div>
-								<div class="btn btn-secondary btn-lg sm-btn" onclick="electricalCar.add()">
-									Kiddy Car <span id="electricalCarPriceSpan"></span> (S)
-								</div>
-								<div class="btn btn-secondary btn-lg sm-btn" onclick="bubbleHouse.add()">
-									Bubble House <span id="bubbleHousePriceSpan"></span> (H)
-								</div>
-							</div>
+          </div>
+        </div>
 
-						</div>
-					</div>
-
-					<div>
-						<div class="mb-4">Other Product:</div>
-						<div class="col mb-4 d-flex group-products">
-							<div class="btn btn-danger btn-lg sm-btn" onclick="bellBalloon.add()">Bell Balloon <span
-									id="bellBalloonPriceSpan"></span> (Q)</div>
-							<div class="btn btn-danger btn-lg sm-btn" onclick="bigBalloon.add()">Anti Slip Socks <span
-									id="bigBalloonPriceSpan"></span> (W)</div>
-							<!-- <div class="btn btn-danger btn-lg sm-btn" onclick="handBalloon.add()">Hand Balloon <span id="handBalloonPriceSpan"></span> (E)</div>
+        <div>
+          <div class="mb-4">Other Product:</div>
+          <div class="col mb-4 d-flex group-products">
+            <div class="btn btn-danger btn-lg sm-btn" onclick="bellBalloon.add()">Bell Balloon <span id="bellBalloonPriceSpan"></span> (Q)</div>
+            <div class="btn btn-danger btn-lg sm-btn" onclick="bigBalloon.add()">Anti Slip Socks <span id="bigBalloonPriceSpan"></span> (W)</div>
+            <!-- <div class="btn btn-danger btn-lg sm-btn" onclick="handBalloon.add()">Hand Balloon <span id="handBalloonPriceSpan"></span> (E)</div>
             <div class="btn btn-danger btn-lg sm-btn" onclick="smallBalloon.add()">Small Balloon <span id="smallBalloonPriceSpan"></span> (R)</div> -->
-						</div>
-						<div class="col mb-4 d-flex group-products">
-							<div class="col-3 btn btn-info btn-lg sm-btn" onclick="minaralWater.add()">Mineral Water
-								<span id="minaralWaterPriceSpan"></span> (A)
-							</div>
-							<!-- <div class="col-3 btn btn-info btn-lg sm-btn" onclick="electricalCar.add()">Electric Car <span id="electricalCarPriceSpan"></span> (S)</div> -->
-							<div class="col-3">
-								<div>Custom Price</div>
-								<div>
-									<input type="input" name="customPriceInput" id="customPriceInput" value="10">
-									<div class="btn btn-info btn-sm" id="addCustomPrice" onclick="customPrice.add()">Add
-									</div>
+          </div>
+          <div class="col mb-4 d-flex group-products">
+            <div class="col-3 btn btn-info btn-lg sm-btn" onclick="minaralWater.add()">Mineral Water <span id="minaralWaterPriceSpan"></span> (A)</div>
+            <!-- <div class="col-3 btn btn-info btn-lg sm-btn" onclick="electricalCar.add()">Electric Car <span id="electricalCarPriceSpan"></span> (S)</div> -->
+            <div class="col-3">
+              <div>Custom Price</div>
+              <div>
+                <input type="input" name="customPriceInput" id="customPriceInput" value="10">
+                <div class="btn btn-info btn-sm" id="addCustomPrice" onclick="customPrice.add()">Add</div>
 
-									<div style="display:none">
-										<input type="input" name="addCustomSummary" id="addCustomSummary" value="MM-DD-2023">
-										<div class="btn btn-info btn-sm" onclick="summary.addCustomSummary()">Add</div>
-									</div>
+                <div style="display:none">
+                  <input type="input" name="addCustomSummary" id="addCustomSummary" value="MM-DD-2023">
+                  <div class="btn btn-info btn-sm" onclick="summary.addCustomSummary()">Add</div>
+                </div>
+                
+              </div>
+            </div>
+            <div class="col-3">
+              <div>WorkShop</div>
+              <div class="d-flex">
+                <input type="input" name="workshopInput" id="workshopInput" class="input-sm" value="10">
+                <div class="btn btn-info btn-sm" id="addWorkshop" onclick="workshopInput.add()">Add</div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
 
-								</div>
-							</div>
-							<div class="col-3">
-								<div>WorkShop</div>
-								<div class="d-flex">
-									<input type="input" name="workshopInput" id="workshopInput" class="input-sm" value="10">
-									<div class="btn btn-info btn-sm" id="addWorkshop" onclick="workshopInput.add()">Add
-									</div>
+      </form>
+    </div>
+    <div class="col-6 bill-details container">
+      <div class="row">
+        <div class="col-4"></div>
+        <div class="col-4">
+          <h3 class="bill-details-title">Details</h3>
+        </div>
+        <div class="col-4 text-end my-auto">
+          <button id="closeDailySalesBtn" class="btn btn-danger btn-sm" onclick="summary.showSummary()">Close Daily Sales</button>
+        </div>
+      </div>
+      
+      <!--<div class="my-2">Phone Number: <input type="input" name="phoneNumber" id="phoneNumber" value="" placeholder="Phone Number"></div>-->
+      <div>
+        Payment By :
+        <div class="btn-group" role="group" aria-label="Payment Type">
+          <input type="radio" class="btn-check" name="paymentType" id="paymentTypeCash" autocomplete="off" checked>
+          <label class="btn btn-outline-primary" for="paymentTypeCash" onclick="paymentType.set(paymentType.cash)">Cash (C)</label>
 
-								</div>
-							</div>
-						</div>
-					</div>
+          <input type="radio" class="btn-check" name="paymentType" id="paymentTypeCc" autocomplete="off">
+          <label class="btn btn-outline-primary" for="paymentTypeCc" onclick="paymentType.set(paymentType.cc)">Credit Card (B)</label>
 
-				</form>
-			</div>
-			<div class="col-6 bill-details container">
-				<div class="row">
-					<div class="col-4"></div>
-					<div class="col-4">
-						<h3 class="bill-details-title">Details</h3>
-					</div>
-					<div class="col-4 text-end my-auto">
-						<button id="closeDailySalesBtn" class="btn btn-danger btn-sm" onclick="summary.showSummary()">Close Daily
-							Sales</button>
-					</div>
-				</div>
+          <input type="radio" class="btn-check" name="paymentType" id="paymentTypeTng" autocomplete="off">
+          <label class="btn btn-outline-primary" for="paymentTypeTng" onclick="paymentType.set(paymentType.tng)">TNG (T)</label>
+        </div>
+      </div>
+      <div id="details-list" class="row"></div>
 
-				<!--<div class="my-2">Phone Number: <input type="input" name="phoneNumber" id="phoneNumber" value="" placeholder="Phone Number"></div>-->
-				<div>
-					Payment By :
-					<div class="btn-group" role="group" aria-label="Payment Type">
-						<input type="radio" class="btn-check" name="paymentType" id="paymentTypeCash" autocomplete="off" checked>
-						<label class="btn btn-outline-primary" for="paymentTypeCash"
-							onclick="paymentType.set(paymentType.cash)">Cash (C)</label>
+      <div id="total-amount-container">Total: <span id="totalAmount" class="text-primary">0.00</span></div>
 
-						<input type="radio" class="btn-check" name="paymentType" id="paymentTypeBank" autocomplete="off">
-						<label class="btn btn-outline-primary" for="paymentTypeBank"
-							onclick="paymentType.set(paymentType.bank)">Credit Card (B)</label>
+      <div class="my-3">
+        <button type="submit" id="submitFormBtn" class="btn btn-primary btn-lg lg-btn submit-btn" onclick="details.submitForm()">Submit (Enter)</button>
+      </div>
+      <div class="my-3">
+        <button type="reset" class="btn btn-dark btn-lg lg-btn submit-btn" onclick="details.reset()">Reset (Esc)</button>
+      </div>
+    </div>
+  </div>
 
-						<input type="radio" class="btn-check" name="paymentType" id="paymentTypeTng" autocomplete="off">
-						<label class="btn btn-outline-primary" for="paymentTypeTng" onclick="paymentType.set(paymentType.tng)">TNG
-							(T)</label>
-					</div>
-				</div>
-				<div id="details-list" class="row"></div>
+  <div>
+    <div>
+      <button type="button" class="btn btn-dark btn-sm" onclick="logging.clear()">Clear Log</button>
+    </div>
+    <div id="log-wrapper"></div>
+  </div>
+ 
+</div>
 
-				<div id="total-amount-container">Total: <span id="totalAmount" class="text-primary">0.00</span></div>
-
-				<div class="my-3">
-					<button type="submit" id="submitFormBtn" class="btn btn-primary btn-lg lg-btn submit-btn"
-						onclick="details.submitForm()">Submit (Enter)</button>
-				</div>
-				<div class="my-3">
-					<button type="reset" class="btn btn-dark btn-lg lg-btn submit-btn" onclick="details.reset()">Reset
-						(Esc)</button>
-				</div>
-			</div>
-		</div>
-
-		<div>
-			<div>
-				<button type="button" class="btn btn-dark btn-sm" onclick="logging.clear()">Clear Log</button>
-			</div>
-			<div id="log-wrapper"></div>
-		</div>
-
-	</div>
-
-
+  
 </body>
 
 </html>
