@@ -26,8 +26,30 @@ function getSpreadSheetDetails() {
   return projectDetails;
 }
 
+function ensureInvoiceColumn(ws) {
+  const headerCell = ws.getRange(1, 1);
+  if (headerCell.getValue() !== 'Invoice Number') {
+    ws.insertColumnBefore(1);
+    ws.getRange(1, 1).setValue('Invoice Number');
+  }
+}
+
+function buildInvoiceNumber(rowNumber, dateObj) {
+  const { projectNo } = getSpreadSheetDetails();
+  const invoiceDate = dateObj instanceof Date ? dateObj : new Date(dateObj);
+  const month = String(invoiceDate.getMonth() + 1).padStart(2, '0');
+  const day = String(invoiceDate.getDate()).padStart(2, '0');
+  const year = String(invoiceDate.getFullYear()).slice(-2);
+  const datePart = `${month}${day}${year}`;
+  // row 2 is first data row -> invoice sequence starts at 1
+  const invoiceSequence = Math.max(1, rowNumber - 1);
+  const rowPart = String(invoiceSequence).padStart(4, '0');
+  return `${projectNo}${datePart}${rowPart}`;
+}
+
 function processForm(formObject) {
-  const today = getDateFormat();
+  const todayObj = new Date();
+  const today = getDateFormat(todayObj);
   var activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var ws = activeSpreadsheet.getSheetByName(today);
 
@@ -37,6 +59,7 @@ function processForm(formObject) {
     ws.setName(today);
 
     ws.appendRow([
+      'Invoice Number',
       'Day Tic',
       'Combo Tic',
       'Socks',
@@ -54,10 +77,16 @@ function processForm(formObject) {
       // "Phone Number",
       'Description',
     ]);
+  } else {
+    ensureInvoiceColumn(ws);
   }
+
+  const nextRow = ws.getLastRow() + 1;
+  const invoiceNumber = buildInvoiceNumber(nextRow, todayObj);
 
   // append new data
   ws.appendRow([
+    invoiceNumber,
     formObject.ticket,
     formObject.halfHourTicket,
     formObject.socks,
@@ -76,7 +105,14 @@ function processForm(formObject) {
     formObject.desc,
   ]);
 
+  const rowNumber = ws.getLastRow();
   calcTodayCurrentSales();
+  return {
+    invoiceNumber,
+    date: today,
+    rowNumber,
+    projectDetails: getSpreadSheetDetails(),
+  };
 }
 
 function updateSummary(headcountPrice, halfHourHeadcountPrice, summaryDate) {
@@ -87,25 +123,25 @@ function updateSummary(headcountPrice, halfHourHeadcountPrice, summaryDate) {
   const lastDateCell = summaryWs.getRange(lastRow, 1);
   const date = getDateFormat(summaryDate);
 
-  formObject.totalSales = getTodayTotalInColumn('M', summaryDate);
+  formObject.totalSales = getTodayTotalInColumn('N', summaryDate);
   formObject.tng = findTotalTngCash(date).tng;
   formObject.actualCash = findTotalTngCash(date).cash;
   formObject.cc = findTotalTngCash(date).cc;
-  formObject.headcount = getTodayTotalInColumn('A', summaryDate);
+  formObject.headcount = getTodayTotalInColumn('B', summaryDate);
   formObject.headcountEarn =
-    getTodayTotalInColumn('A', summaryDate) * headcountPrice;
-  formObject.hourlyheadcount = getTodayTotalInColumn('B');
+    getTodayTotalInColumn('B', summaryDate) * headcountPrice;
+  formObject.hourlyheadcount = getTodayTotalInColumn('C', summaryDate);
   formObject.hourlyheadcountEarn =
-    getTodayTotalInColumn('B') * halfHourHeadcountPrice;
-  formObject.socks = getTodayTotalInColumn('C', summaryDate);
-  formObject.bellBalloon = getTodayTotalInColumn('D', summaryDate);
-  formObject.bigBalloon = getTodayTotalInColumn('E', summaryDate);
-  formObject.handBalloon = getTodayTotalInColumn('F', summaryDate);
-  formObject.smallBalloon = getTodayTotalInColumn('G', summaryDate);
-  formObject.minaralWater = getTodayTotalInColumn('H', summaryDate);
-  formObject.electricalCar = getTodayTotalInColumn('I', summaryDate);
-  formObject.workshopAmount = getTodayTotalInColumn('J', summaryDate);
-  formObject.bubbleHouse = getTodayTotalInColumn('K', summaryDate);
+    getTodayTotalInColumn('C', summaryDate) * halfHourHeadcountPrice;
+  formObject.socks = getTodayTotalInColumn('D', summaryDate);
+  formObject.bellBalloon = getTodayTotalInColumn('E', summaryDate);
+  formObject.bigBalloon = getTodayTotalInColumn('F', summaryDate);
+  formObject.handBalloon = getTodayTotalInColumn('G', summaryDate);
+  formObject.smallBalloon = getTodayTotalInColumn('H', summaryDate);
+  formObject.minaralWater = getTodayTotalInColumn('I', summaryDate);
+  formObject.electricalCar = getTodayTotalInColumn('J', summaryDate);
+  formObject.workshopAmount = getTodayTotalInColumn('K', summaryDate);
+  formObject.bubbleHouse = getTodayTotalInColumn('L', summaryDate);
 
   if (
     lastDateCell.getValue() &&
@@ -156,8 +192,8 @@ function findTotalTngCash(summaryDate) {
   const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const todayWs = activeSpreadsheet.getSheetByName(date);
   const data = todayWs.getDataRange().getValues();
-  const dayDataPaymentTypeColLocation = 11; //update if add new column
-  const dayDataAmountColLocation = 12; //update if add new column
+  const dayDataPaymentTypeColLocation = 12; // update if columns change
+  const dayDataAmountColLocation = 13; // update if columns change
 
   const totalTng = data
     .filter((data) => {
@@ -204,22 +240,22 @@ function calcTodayCurrentSales() {
   const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const todaySalesWs = activeSpreadsheet.getSheetByName('today_sales');
   const today = new Date();
-  const totalSales = getTodayTotalInColumn('M', today);
+  const totalSales = getTodayTotalInColumn('N', today);
   const tng = findTotalTngCash(today).tng;
   const actualCash = findTotalTngCash(today).cash;
   const cc = findTotalTngCash(today).cc;
   const headcount =
-    getTodayTotalInColumn('A', today) + getTodayTotalInColumn('B', today);
+    getTodayTotalInColumn('B', today) + getTodayTotalInColumn('C', today);
   const socks =
-    getTodayTotalInColumn('C', today) + getTodayTotalInColumn('E', today);
-  const bellBalloon = getTodayTotalInColumn('D', today);
-  // const bigBalloon = getTodayTotalInColumn('E', today);
-  // const handBalloon = getTodayTotalInColumn('E',today);
-  // const smallBalloon = getTodayTotalInColumn('F', today);
-  const minaralWater = getTodayTotalInColumn('H', today);
-  const electricalCar = getTodayTotalInColumn('I', today);
-  const workshopAmount = getTodayTotalInColumn('J', today);
-  const bubblehouseAmount = getTodayTotalInColumn('K', today);
+    getTodayTotalInColumn('D', today) + getTodayTotalInColumn('F', today);
+  const bellBalloon = getTodayTotalInColumn('E', today);
+  // const bigBalloon = getTodayTotalInColumn('F', today);
+  // const handBalloon = getTodayTotalInColumn('G',today);
+  // const smallBalloon = getTodayTotalInColumn('H', today);
+  const minaralWater = getTodayTotalInColumn('I', today);
+  const electricalCar = getTodayTotalInColumn('J', today);
+  const workshopAmount = getTodayTotalInColumn('K', today);
+  const bubblehouseAmount = getTodayTotalInColumn('L', today);
 
   todaySalesWs.getRange('B2').setValue(totalSales);
   todaySalesWs.getRange('B3').setValue(actualCash);

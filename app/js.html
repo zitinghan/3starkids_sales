@@ -10,9 +10,27 @@
   }
   window.addEventListener('load', preventFormSubmit);
 
-  function handleFormSubmit(data) {
-    google.script.run.processForm(details.object);
-    document.getElementById("myForm").reset();
+  function handleFormSubmit(payload, priceSnapshot, itemsForReceipt) {
+    google.script.run.withFailureHandler(function () {
+      alert('Data Insert Error! - Please check your network status');
+      document.getElementById('submitFormBtn').disabled = false;
+    }).withSuccessHandler(function (result) {
+      const receiptData = {
+        invoiceNumber: result.invoiceNumber,
+        date: result.date,
+        time: payload.time,
+        paymentType: payload.paymentType,
+        total: payload.total,
+        items: itemsForReceipt,
+        prices: priceSnapshot,
+        projectDetails: result.projectDetails
+      };
+      receipt.render(receiptData);
+      receipt.print();
+      logging.add({ ...payload, invoiceNumber: result.invoiceNumber });
+      details.reset();
+      document.getElementById('submitFormBtn').disabled = false;
+    }).processForm(payload);
   }
 
   function setSpreadSheetDetails() {
@@ -20,6 +38,9 @@
       document.getElementById('projectNo').innerHTML = result.projectNo;
       document.getElementById('projectLocation').innerHTML = result.projectLocation;
       document.getElementById('projectDate').innerHTML = result.projectDate;
+      appContext.projectNo = result.projectNo;
+      appContext.projectLocation = result.projectLocation;
+      appContext.projectDate = result.projectDate;
     }).getSpreadSheetDetails();
   }
 
@@ -41,6 +62,19 @@
     bubbleHouse: 20,
     showAllLog: false, // whether to show all log. False only show latest 5 records
     holidayDates: ['16-9-2024', '17-9-2024'] // month(no zero infront)-day-year
+  };
+
+  const RECEIPT_SETTINGS = {
+    logoUrl: '', // optional override; default uses #receipt-logo src
+    companyName: 'Amazing Star Kids Sdn Bhd',
+    companyReg: '(1490330-K)',
+    width: '58mm'
+  };
+
+  const appContext = {
+    projectNo: '',
+    projectLocation: '',
+    projectDate: ''
   };
 
   const app = {
@@ -166,7 +200,7 @@
       }
     },
     set: (type) => {
-      this.value = type ? type : paymentType.cash;
+      paymentType.value = type ? type : paymentType.cash;
       switch (type) {
         case paymentType.cc:
           document.getElementById('paymentTypeCc').checked = true;
@@ -182,7 +216,7 @@
       }
     },
     get: () => {
-      return this.value;
+      return paymentType.value;
     }
   }
 
@@ -264,26 +298,24 @@
       // document.getElementById('phoneNumber').value = '';
     },
     submitForm: () => {
+      if (Object.keys(details.object).length === 0) {
+        return;
+      }
       document.getElementById('submitFormBtn').disabled = true;
-      google.script.run.withFailureHandler(function (result) {
-        alert('Data Insert Error! - Please check your network status');
-      }).withSuccessHandler(function (result) {
-        if (Object.keys(details.object).length > 0) {
-          details.object.time = details.getCurrentTime();
-          details.object.paymentType = paymentType.get();
-          details.object.total = details.totalAmount;
-          // details.object.phoneNumber = document.getElementById('phoneNumber').value;
-          if (details.object.customPrice) {
-            details.object.desc = `custom price: ${document.getElementById('customPriceInput').value} x ${details.object.customPrice}`;
-          }
-          if (details.object.workshopInput) {
-            details.object.workshopAmount = document.getElementById('workshopInput').value;
-          }
-          handleFormSubmit(details.object);
-          logging.add(details.object);
-          details.reset();
-        }
-      }).isOnline();
+      const itemsForReceipt = { ...details.object };
+      const priceSnapshot = todayPrice.getPrice();
+      const payload = { ...itemsForReceipt };
+      payload.time = details.getCurrentTime();
+      payload.paymentType = paymentType.get();
+      payload.total = details.totalAmount;
+      // payload.phoneNumber = document.getElementById('phoneNumber').value;
+      if (payload.customPrice) {
+        payload.desc = `custom price: ${document.getElementById('customPriceInput').value} x ${payload.customPrice}`;
+      }
+      if (payload.workshopInput) {
+        payload.workshopAmount = document.getElementById('workshopInput').value;
+      }
+      handleFormSubmit(payload, priceSnapshot, itemsForReceipt);
     },
     getCurrentTime: () => {
       const now = new Date();
@@ -399,9 +431,143 @@
   const workshopInput = updateProgramDetails('workshopInput', 'DIY Workshop');
   const bubbleHouse = updateProgramDetails('bubbleHouse', 'Bubble House');
 
+  const receipt = {
+    lastPayload: null,
+    getLogoInfo: () => {
+      const logoEl = document.getElementById('receipt-logo');
+      const srcFromDom = logoEl ? logoEl.getAttribute('src') : '';
+      const logoSrc = (srcFromDom || RECEIPT_SETTINGS.logoUrl || '').trim();
+      return { logoEl, logoSrc };
+    },
+    ensureLogoReady: () => {
+      return new Promise((resolve) => {
+        const { logoEl, logoSrc } = receipt.getLogoInfo();
+        if (!logoEl || !logoSrc) {
+          resolve();
+          return;
+        }
+        logoEl.style.display = 'block';
+        if (logoEl.src !== logoSrc) {
+          logoEl.src = logoSrc;
+        }
+        if (logoEl.complete && logoEl.naturalWidth > 0) {
+          resolve();
+          return;
+        }
+        const fallback = setTimeout(resolve, 500);
+        logoEl.onload = () => {
+          clearTimeout(fallback);
+          resolve();
+        };
+        logoEl.onerror = () => {
+          clearTimeout(fallback);
+          resolve();
+        };
+      });
+    },
+    render: (data) => {
+      const receiptEl = document.getElementById('receipt');
+      if (!receiptEl) {
+        return;
+      }
+      // keep receipt rendered off-screen so assets load
+      receiptEl.style.display = 'block';
+
+      const { logoEl, logoSrc } = receipt.getLogoInfo();
+      if (logoEl) {
+        if (logoSrc) {
+          logoEl.src = logoSrc;
+          logoEl.style.display = 'block';
+        } else {
+          logoEl.style.display = 'none';
+        }
+      }
+
+      const projectText = [appContext.projectNo, appContext.projectLocation]
+        .filter(Boolean)
+        .join(' ');
+      if (document.getElementById('receipt-project')) {
+        document.getElementById('receipt-project').innerText = projectText;
+      }
+      if (document.getElementById('receipt-company')) {
+        document.getElementById('receipt-company').innerText = RECEIPT_SETTINGS.companyName;
+      }
+      if (document.getElementById('receipt-reg')) {
+        document.getElementById('receipt-reg').innerText = RECEIPT_SETTINGS.companyReg;
+      }
+      if (document.getElementById('receipt-invoice')) {
+        document.getElementById('receipt-invoice').innerText = data.invoiceNumber || '';
+      }
+      if (document.getElementById('receipt-date')) {
+        document.getElementById('receipt-date').innerText = data.date || '';
+      }
+      if (document.getElementById('receipt-time')) {
+        document.getElementById('receipt-time').innerText = data.time || '';
+      }
+      if (document.getElementById('receipt-payment')) {
+        document.getElementById('receipt-payment').innerText = data.paymentType || '';
+      }
+
+      const itemsContainer = document.getElementById('receipt-items');
+      if (itemsContainer) {
+        itemsContainer.innerHTML = receipt.buildItemsHtml(data.items, data.prices);
+      }
+      if (document.getElementById('receipt-total')) {
+        document.getElementById('receipt-total').innerText = Number(data.total || 0).toFixed(2);
+      }
+
+      receipt.lastPayload = data;
+    },
+    buildItemsHtml: (items, prices) => {
+      let html = '';
+      const labels = receipt.getItemLabels();
+      Object.keys(items || {}).forEach((key) => {
+        const qty = items[key];
+        if (!qty || !labels[key]) {
+          return;
+        }
+        const price = parseFloat(prices[key] || 0);
+        const subtotal = price * qty;
+        html += `<div class="receipt-row"><span class="qty">${qty}</span><span class="item">${labels[key]}</span><span class="amount">${subtotal.toFixed(2)}</span></div>`;
+      });
+      if (!html) {
+        html = '<div class="receipt-row"><span>No items</span></div>';
+      }
+      return html;
+    },
+    getItemLabels: () => ({
+      ticket: ticket.getName,
+      halfHourTicket: halfHourTicket.getName,
+      socks: socks.getName,
+      bellBalloon: bellBalloon.getName,
+      bigBalloon: bigBalloon.getName,
+      smallBalloon: smallBalloon.getName,
+      handBalloon: handBalloon.getName,
+      minaralWater: minaralWater.getName,
+      electricalCar: electricalCar.getName,
+      bubbleHouse: bubbleHouse.getName,
+      customPrice: customPrice.getName,
+      workshopInput: workshopInput.getName,
+    }),
+    print: () => {
+      if (!receipt.lastPayload) {
+        alert('No receipt to print yet.');
+        return;
+      }
+      receipt.ensureLogoReady().then(() => {
+        window.print();
+      });
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', function () {
     app.init();
     priceLabel.setLabel();
+    const logoInfo = receipt.getLogoInfo();
+    if (logoInfo.logoSrc) {
+      const preload = new Image();
+      preload.src = logoInfo.logoSrc;
+    }
   });
 
 
