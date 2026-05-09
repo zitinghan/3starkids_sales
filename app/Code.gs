@@ -1,4 +1,11 @@
-function doGet() {
+function doGet(e) {
+  const page = e && e.parameter && e.parameter.page;
+  if (page === 'dashboard') {
+    return HtmlService.createTemplateFromFile('dashboard')
+      .evaluate()
+      .setTitle('3 Star Kids — Live Dashboard')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
   return HtmlService.createTemplateFromFile('index').evaluate();
 }
 
@@ -267,4 +274,77 @@ function calcTodayCurrentSales() {
   todaySalesWs.getRange('B11').setValue(workshopAmount);
   todaySalesWs.getRange('B12').setValue(bubblehouseAmount);
   todaySalesWs.getRange('B13').setValue(customDoll);
+}
+
+function getDashboardData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const datePattern = /^\d{1,2}-\d{1,2}-\d{4}$/;
+
+  const dateSheets = ss.getSheets()
+    .filter(s => datePattern.test(s.getName()))
+    .sort((a, b) => _parseDate(b.getName()) - _parseDate(a.getName()))
+    .slice(0, 30);
+
+  const history = dateSheets.map(sheet => _buildDayData(sheet));
+
+  const today = getDateFormat();
+  const todayData = history.find(d => d.date === today) || _emptyDay(today);
+
+  return {
+    today: todayData,
+    history: history,
+    projectDetails: getSpreadSheetDetails(),
+    lastUpdated: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'HH:mm:ss')
+  };
+}
+
+function _buildDayData(sheet) {
+  const name = sheet.getName();
+  const rows = sheet.getDataRange().getValues().slice(1); // skip header
+  let totalSales = 0, cash = 0, tng = 0, cc = 0;
+  let headcount = 0, combo = 0, socks = 0, antiSlipSocks = 0;
+  let honeyWater = 0, minaralWater = 0, electricalCar = 0;
+  let bubbleHouse = 0, workshop = 0, customDoll = 0;
+
+  rows.forEach(r => {
+    const toN = v => parseFloat(v) || 0;
+    headcount    += toN(r[1]);  // B
+    combo        += toN(r[2]);  // C
+    socks        += toN(r[3]);  // D
+    honeyWater   += toN(r[4]);  // E
+    antiSlipSocks+= toN(r[5]);  // F
+    customDoll   += toN(r[7]);  // H
+    minaralWater += toN(r[8]);  // I
+    electricalCar+= toN(r[9]);  // J
+    workshop     += toN(r[10]); // K
+    bubbleHouse  += toN(r[11]); // L
+    const payment = r[12];      // M
+    const amount  = toN(r[13]); // N
+    totalSales += amount;
+    if (payment === 'Cash')        cash += amount;
+    else if (payment === 'TNG')    tng  += amount;
+    else if (payment === 'Credit Card') cc += amount;
+  });
+
+  return {
+    date: name, totalSales, cash, tng, cc,
+    headcount, combo, socks, antiSlipSocks,
+    honeyWater, minaralWater, electricalCar,
+    bubbleHouse, workshop, customDoll
+  };
+}
+
+function _emptyDay(date) {
+  return {
+    date, totalSales: 0, cash: 0, tng: 0, cc: 0,
+    headcount: 0, combo: 0, socks: 0, antiSlipSocks: 0,
+    honeyWater: 0, minaralWater: 0, electricalCar: 0,
+    bubbleHouse: 0, workshop: 0, customDoll: 0
+  };
+}
+
+function _parseDate(str) {
+  const p = str.split('-');
+  if (p.length !== 3) return 0;
+  return new Date(parseInt(p[2]), parseInt(p[0]) - 1, parseInt(p[1])).getTime();
 }
