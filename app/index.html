@@ -19,7 +19,7 @@
       <div class="col-6 row">
         <form id="myForm">
           <div class="mb-4 text-center">
-            <div class="h4">3 Star Kids Sales v3.1</div>
+            <div class="h4" id="appTitle">3 Star Kids Sales</div>
             <div class="row">
               <small class="col-3">Project No: <span id="projectNo"></span></small>
               <small class="col-3">Location: <span id="projectLocation"></small>
@@ -144,7 +144,7 @@
     <div>
       <div>
         <button type="button" class="btn btn-dark btn-sm" onclick="logging.clear()">Clear Log</button>
-        <button type="button" class="btn btn-secondary btn-sm ms-2" onclick="receipt.print()">Print Last
+        <button id="printLastReceiptBtn" type="button" class="btn btn-secondary btn-sm ms-2" onclick="receipt.print()">Print Last
           Receipt</button>
       </div>
       <div id="log-wrapper"></div>

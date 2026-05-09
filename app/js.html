@@ -25,8 +25,10 @@
         prices: priceSnapshot,
         projectDetails: result.projectDetails
       };
-      receipt.render(receiptData);
-      receipt.print();
+      if (SETTINGS.printReceiptEnabled) {
+        receipt.render(receiptData);
+        receipt.print();
+      }
       logging.add({ ...payload, invoiceNumber: result.invoiceNumber });
       details.reset();
       document.getElementById('submitFormBtn').disabled = false;
@@ -61,8 +63,11 @@
     electricalCar: 20,
     bubbleHouse: 20,
     showAllLog: false, // whether to show all log. False only show latest 5 records
-    holidayDates: ['16-9-2024', '17-9-2024'] // month(no zero infront)-day-year
+    holidayDates: ['16-9-2024', '17-9-2024'], // month(no zero infront)-day-year
+    printReceiptEnabled: true // set false for event locations that don't print receipts
   };
+
+  document.getElementById('appTitle').innerText = '3 Star Kids Sales v3.2';
 
   const RECEIPT_SETTINGS = {
     logoUrl: '', // optional override; default uses #receipt-logo src
@@ -567,6 +572,12 @@
     if (logoInfo.logoSrc) {
       const preload = new Image();
       preload.src = logoInfo.logoSrc;
+    }
+    if (!SETTINGS.printReceiptEnabled) {
+      const printBtn = document.getElementById('printLastReceiptBtn');
+      if (printBtn) {
+        printBtn.style.display = 'none';
+      }
     }
   });
 
