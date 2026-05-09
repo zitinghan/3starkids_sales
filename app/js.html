@@ -55,13 +55,12 @@
     weekdayHalfHourTicket: 48,
     weekendsHalfHourTicket: 54,
     socks: 4,
-    bellBalloon: 8,
-    bigBalloon: 6,
-    smallBalloon: 3,
+    honeyWater: 12,
+    antiSlipSocks: 6,
     handBalloon: 4,
     minaralWater: 2,
     electricalCar: 20,
-    bubbleHouse: 20,
+    bubbleHouse: 25,
     showAllLog: false, // whether to show all log. False only show latest 5 records
     holidayDates: ['16-9-2024', '17-9-2024'], // month(no zero infront)-day-year
     printReceiptEnabled: true // set false for event locations that don't print receipts
@@ -105,19 +104,15 @@
             break;
 
           case 81: // key q
-            bellBalloon.add();
+            honeyWater.add();
             break;
 
           case 87: // key w
-            bigBalloon.add();
+            antiSlipSocks.add();
             break;
 
           case 69: // key e
             handBalloon.add();
-            break;
-
-          case 82: // key r
-            smallBalloon.add();
             break;
 
           case 27: // key esc
@@ -181,15 +176,15 @@
         ticket: todayPrice.isWeekday(today) ? SETTINGS.weekdayTicket : SETTINGS.weekendsTicket,
         halfHourTicket: todayPrice.isWeekday(today) ? SETTINGS.weekdayHalfHourTicket : SETTINGS.weekendsHalfHourTicket,
         socks: SETTINGS.socks,
-        bellBalloon: SETTINGS.bellBalloon,
-        bigBalloon: SETTINGS.bigBalloon,
-        smallBalloon: SETTINGS.smallBalloon,
+        honeyWater: SETTINGS.honeyWater,
+        antiSlipSocks: SETTINGS.antiSlipSocks,
         handBalloon: SETTINGS.handBalloon,
         minaralWater: SETTINGS.minaralWater,
         electricalCar: SETTINGS.electricalCar,
         bubbleHouse: SETTINGS.bubbleHouse,
         customPrice: document.getElementById('customPriceInput')?.value,
-        workshopInput: document.getElementById('workshopInput')?.value
+        workshopInput: document.getElementById('workshopInput')?.value,
+        customDoll: document.getElementById('customDollInput')?.value
       }
     }
   };
@@ -245,14 +240,11 @@
         if (key === 'socks') {
           html += socks.getHtml();
         }
-        if (key === 'bellBalloon') {
-          html += bellBalloon.getHtml();
+        if (key === 'honeyWater') {
+          html += honeyWater.getHtml();
         }
-        if (key === 'bigBalloon') {
-          html += bigBalloon.getHtml();
-        }
-        if (key === 'smallBalloon') {
-          html += smallBalloon.getHtml();
+        if (key === 'antiSlipSocks') {
+          html += antiSlipSocks.getHtml();
         }
         if (key === 'handBalloon') {
           html += handBalloon.getHtml();
@@ -274,13 +266,21 @@
           html += '<div class="row">';
           html += `<div class="col-5" >${workshopInput.getName}</div>`;
           html += '<div class="col">x</div>';
-          html += `<div class="col">${document.getElementById(key).value}</div>`;
+          html += `<div class="col">${document.getElementById('workshopInput').value}</div>`;
           html += '<div class="col-4 details-item-control">';
-          html += `<button type="button" class="btn btn-danger" onClick="workshopInput.deduct(${key})">-</button>`;
+          html += `<button type="button" class="btn btn-danger" onClick="workshopInput.deduct()">-</button>`;
           html += `<button type="button" class="btn btn-outline-secondary">${details.object[key]}</button>`;
-          if (key !== 'workshopInput') {
-            html += `<button type="button" class="btn btn-success" onClick="workshopInput.add(${key})">+</button>`;
-          }
+          html += '</div></div>';
+        }
+
+        if (key === 'customDoll') {
+          html += '<div class="row">';
+          html += `<div class="col-5" >${customDoll.getName}</div>`;
+          html += '<div class="col">x</div>';
+          html += `<div class="col">${document.getElementById('customDollInput').value}</div>`;
+          html += '<div class="col-4 details-item-control">';
+          html += `<button type="button" class="btn btn-danger" onClick="customDoll.deduct()">-</button>`;
+          html += `<button type="button" class="btn btn-outline-secondary">${details.object[key]}</button>`;
           html += '</div></div>';
         }
       }
@@ -425,16 +425,16 @@
 
   const ticket = updateProgramDetails('ticket', 'Ticket');
   const halfHourTicket = updateProgramDetails('halfHourTicket', 'Combo Ticket');
-  const socks = updateProgramDetails('socks', 'Socks 4');
-  const bellBalloon = updateProgramDetails('bellBalloon', 'Bell Balloon');
-  const bigBalloon = updateProgramDetails('bigBalloon', 'Socks 6');
-  const smallBalloon = updateProgramDetails('smallBalloon', 'Small Balloon');
+  const socks = updateProgramDetails('socks', 'Socks');
+  const honeyWater = updateProgramDetails('honeyWater', 'Honey Water');
+  const antiSlipSocks = updateProgramDetails('antiSlipSocks', 'Anti Slip Socks');
   const handBalloon = updateProgramDetails('handBalloon', 'Hand Balloon');
-  const minaralWater = updateProgramDetails('minaralWater', 'Minaral Water');
+  const minaralWater = updateProgramDetails('minaralWater', 'Mineral Water');
   const electricalCar = updateProgramDetails('electricalCar', 'Electrical Car');
   const customPrice = updateProgramDetails('customPrice', 'Custom Price');
   const workshopInput = updateProgramDetails('workshopInput', 'DIY Workshop');
   const bubbleHouse = updateProgramDetails('bubbleHouse', 'Bubble House');
+  const customDoll = updateProgramDetails('customDoll', 'Custom Doll');
 
   const receipt = {
     lastPayload: null,
@@ -544,15 +544,15 @@
       ticket: ticket.getName,
       halfHourTicket: halfHourTicket.getName,
       socks: socks.getName,
-      bellBalloon: bellBalloon.getName,
-      bigBalloon: bigBalloon.getName,
-      smallBalloon: smallBalloon.getName,
+      honeyWater: honeyWater.getName,
+      antiSlipSocks: antiSlipSocks.getName,
       handBalloon: handBalloon.getName,
       minaralWater: minaralWater.getName,
       electricalCar: electricalCar.getName,
       bubbleHouse: bubbleHouse.getName,
       customPrice: customPrice.getName,
       workshopInput: workshopInput.getName,
+      customDoll: customDoll.getName,
     }),
     print: () => {
       if (!receipt.lastPayload) {
