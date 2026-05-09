@@ -320,6 +320,9 @@
       if (payload.workshopInput) {
         payload.workshopAmount = document.getElementById('workshopInput').value;
       }
+      if (payload.customDoll) {
+        payload.customDollAmount = document.getElementById('customDollInput').value;
+      }
       handleFormSubmit(payload, priceSnapshot, itemsForReceipt);
     },
     getCurrentTime: () => {

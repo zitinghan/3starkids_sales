@@ -63,10 +63,10 @@ function processForm(formObject) {
       'Day Tic',
       'Combo Tic',
       'Socks',
-      'Bell Balloon',
-      'Socks 6',
+      'Honey Water',
+      'Anti Slip Socks',
       'Hand Balloon',
-      'Small Balloon',
+      'Custom Doll',
       'M.Water',
       'K.Car',
       'Workshop',
@@ -90,10 +90,10 @@ function processForm(formObject) {
     formObject.ticket,
     formObject.halfHourTicket,
     formObject.socks,
-    formObject.bellBalloon,
-    formObject.bigBalloon,
+    formObject.honeyWater,
+    formObject.antiSlipSocks,
     formObject.handBalloon,
-    formObject.smallBalloon,
+    formObject.customDollAmount,
     formObject.minaralWater,
     formObject.electricalCar,
     formObject.workshopAmount,
@@ -134,10 +134,10 @@ function updateSummary(headcountPrice, halfHourHeadcountPrice, summaryDate) {
   formObject.hourlyheadcountEarn =
     getTodayTotalInColumn('C', summaryDate) * halfHourHeadcountPrice;
   formObject.socks = getTodayTotalInColumn('D', summaryDate);
-  formObject.bellBalloon = getTodayTotalInColumn('E', summaryDate);
-  formObject.bigBalloon = getTodayTotalInColumn('F', summaryDate);
+  formObject.honeyWater = getTodayTotalInColumn('E', summaryDate);
+  formObject.antiSlipSocks = getTodayTotalInColumn('F', summaryDate);
   formObject.handBalloon = getTodayTotalInColumn('G', summaryDate);
-  formObject.smallBalloon = getTodayTotalInColumn('H', summaryDate);
+  formObject.customDoll = getTodayTotalInColumn('H', summaryDate);
   formObject.minaralWater = getTodayTotalInColumn('I', summaryDate);
   formObject.electricalCar = getTodayTotalInColumn('J', summaryDate);
   formObject.workshopAmount = getTodayTotalInColumn('K', summaryDate);
@@ -164,10 +164,10 @@ function updateSummary(headcountPrice, halfHourHeadcountPrice, summaryDate) {
     formObject.hourlyheadcount,
     formObject.hourlyheadcountEarn,
     formObject.socks,
-    formObject.bellBalloon,
-    formObject.bigBalloon,
+    formObject.honeyWater,
+    formObject.antiSlipSocks,
     formObject.handBalloon,
-    formObject.smallBalloon,
+    formObject.customDoll,
     formObject.minaralWater,
     formObject.electricalCar,
     formObject.workshopAmount,
@@ -248,10 +248,8 @@ function calcTodayCurrentSales() {
     getTodayTotalInColumn('B', today) + getTodayTotalInColumn('C', today);
   const socks =
     getTodayTotalInColumn('D', today) + getTodayTotalInColumn('F', today);
-  const bellBalloon = getTodayTotalInColumn('E', today);
-  // const bigBalloon = getTodayTotalInColumn('F', today);
-  // const handBalloon = getTodayTotalInColumn('G',today);
-  // const smallBalloon = getTodayTotalInColumn('H', today);
+  const honeyWater = getTodayTotalInColumn('E', today);
+  const customDoll = getTodayTotalInColumn('H', today);
   const minaralWater = getTodayTotalInColumn('I', today);
   const electricalCar = getTodayTotalInColumn('J', today);
   const workshopAmount = getTodayTotalInColumn('K', today);
@@ -263,12 +261,10 @@ function calcTodayCurrentSales() {
   todaySalesWs.getRange('B5').setValue(cc);
   todaySalesWs.getRange('B6').setValue(headcount);
   todaySalesWs.getRange('B7').setValue(socks);
-  todaySalesWs.getRange('B8').setValue(bellBalloon);
-  // todaySalesWs.getRange("B8").setValue(handBalloon);
-  // todaySalesWs.getRange("B8").setValue(bigBalloon);
-  // todaySalesWs.getRange("B10").setValue(smallBalloon);
+  todaySalesWs.getRange('B8').setValue(honeyWater);
   todaySalesWs.getRange('B9').setValue(minaralWater);
   todaySalesWs.getRange('B10').setValue(electricalCar);
   todaySalesWs.getRange('B11').setValue(workshopAmount);
   todaySalesWs.getRange('B12').setValue(bubblehouseAmount);
+  todaySalesWs.getRange('B13').setValue(customDoll);
 }
