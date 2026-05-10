@@ -73,7 +73,7 @@
               <div class="col-3">
                 <div>Custom Price</div>
                 <div>
-                  <input type="input" name="customPriceInput" id="customPriceInput" value="10">
+                  <input type="input" name="customPriceInput" id="customPriceInput" value="10" oninput="details.drawList()">
                   <div class="btn btn-info btn-sm" id="addCustomPrice" onclick="customPrice.add()">Add</div>
 
                   <div style="display:none">
@@ -86,14 +86,14 @@
               <div class="col-3">
                 <div>WorkShop</div>
                 <div class="d-flex">
-                  <input type="input" name="workshopInput" id="workshopInput" class="input-sm" value="10">
+                  <input type="input" name="workshopInput" id="workshopInput" class="input-sm" value="10" oninput="details.drawList()">
                   <div class="btn btn-info btn-sm" id="addWorkshop" onclick="workshopInput.add()">Add</div>
                 </div>
               </div>
               <div class="col-3">
                 <div>Custom Doll</div>
                 <div class="d-flex">
-                  <input type="input" name="customDollInput" id="customDollInput" class="input-sm" value="10">
+                  <input type="input" name="customDollInput" id="customDollInput" class="input-sm" value="10" oninput="details.drawList()">
                   <div class="btn btn-info btn-sm" id="addCustomDoll" onclick="customDoll.add()">Add</div>
                 </div>
               </div>

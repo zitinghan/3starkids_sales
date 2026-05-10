@@ -66,8 +66,6 @@
     printReceiptEnabled: true // set false for event locations that don't print receipts
   };
 
-  document.getElementById('appTitle').innerText = '3 Star Kids Sales v3.2';
-
   const RECEIPT_SETTINGS = {
     logoUrl: '', // optional override; default uses #receipt-logo src
     companyName: 'Amazing Star Kids Sdn Bhd',
@@ -569,6 +567,7 @@
   };
 
   document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('appTitle').innerText = '3 Star Kids Sales v3.2';
     app.init();
     priceLabel.setLabel();
     const logoInfo = receipt.getLogoInfo();
